@@ -1,7 +1,10 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:my_webpage/firebase_options.dart';
 import 'package:my_webpage/postpage.dart';
+import 'package:my_webpage/sidebar.dart';
 
 import 'homepage.dart';
 
@@ -12,17 +15,21 @@ class CustomRouter {
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) => const HomePage(),
+        builder: (context, state) => const MainLayout(child: HomePage()),
       ),
       GoRoute(
         path: '/post',
-        builder: (context, state) => PostPage(),
+        builder: (context, state) => const MainLayout(child: PostPage()),
       ),
     ],
   );
 }
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -34,15 +41,40 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       routerConfig: CustomRouter.router,
+      theme: ThemeData(
+        fontFamily: 'Onglyp_harunanum',
+        brightness: Brightness.dark,
+      ),
     );
   }
 }
 
-// 블로그 글 목록을 관리하는 간단한 Riverpod 상태 관리
-final blogPostsProvider = Provider<List<String>>((ref) {
-  return [
-    'Welcome to My Blog',
-    'Flutter Tips and Tricks',
-    'State Management with Riverpod',
-  ];
-});
+// 메인 레이아웃
+class MainLayout extends StatelessWidget {
+  final Widget child;
+
+  const MainLayout({required this.child, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Row(
+        children: [
+          Container(
+            width: 250,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              image: DecorationImage(
+                image: AssetImage('assets/images/glitter.jpg'),
+                opacity: 0.5,
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Sidebar(),
+          ),
+          Expanded(child: child),
+        ],
+      ),
+    );
+  }
+}

@@ -9,6 +9,11 @@
 .history
 .svn/
 migrate_working_dir/
+lib/firebase_options.dart
+android/app/google-services.json
+android/app/build.gradle
+ios/Runner/GoogleService-Info.plist
+macos/Runner/GoogleService-Info.plist
 
 # IntelliJ related
 *.iml
