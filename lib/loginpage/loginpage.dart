@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-class LoginPage extends StatelessWidget {
+import 'idpwcontroller.dart';
+
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  var idPwController = IdPwController();
 
   @override
   Widget build(BuildContext context) {
@@ -14,29 +24,35 @@ class LoginPage extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: SizedBox(
                 width: 500,
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
+                child: idPwController.buildForm(context),
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: SizedBox(
                 width: 500,
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
+                child: idPwController.buildForm(context),
               ),
             ),
-            ElevatedButton(onPressed: () {}, child: Text('login'))
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: idPwController.loginElevatedButton(context),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                        onPressed: () {
+                          context.go('/');
+                        },
+                        child: Text('GO HOME')),
+                  )
+                ],
+              ),
+            )
           ],
         ),
       ),

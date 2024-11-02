@@ -2,7 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:my_webpage/firebase_options.dart';
+import 'package:my_webpage/data/firebase_options.dart';
+import 'package:my_webpage/loginpage/loginpage.dart';
+import 'package:my_webpage/postingpage.dart';
 import 'package:my_webpage/postpage.dart';
 import 'package:my_webpage/sidebar.dart';
 
@@ -20,6 +22,14 @@ class CustomRouter {
       GoRoute(
         path: '/post',
         builder: (context, state) => const MainLayout(child: PostPage()),
+      ),
+      GoRoute(
+        path: '/postingPage',
+        builder: (context, state) => const PostingPage(),
+      ),
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginPage(),
       ),
     ],
   );

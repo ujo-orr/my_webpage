@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'main.dart';
+import 'package:my_webpage/data/postdata.dart';
 
 class Sidebar extends ConsumerWidget {
   const Sidebar({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final posts = ref.watch(blogPostsProvider);
+    final posts = ref.watch(sideBarProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,16 +49,20 @@ class Sidebar extends ConsumerWidget {
             },
           ),
         ),
+        GestureDetector(
+          child: Opacity(
+            opacity: 0.0,
+            child: Container(
+              height: 50,
+              width: 50,
+              color: Colors.black,
+            ),
+          ),
+          onTap: () {
+            context.go('/login');
+          },
+        ),
       ],
     );
   }
 }
-
-// 블로그 글 목록 상태
-final blogPostsProvider = Provider<List<String>>((ref) {
-  return [
-    'Welcome to My Blog',
-    'Flutter Tips and Tricks',
-    'State Management with Riverpod',
-  ];
-});
