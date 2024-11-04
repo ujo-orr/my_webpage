@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:my_webpage/data/firebase_options.dart';
 import 'package:my_webpage/loginpage/loginpage.dart';
 import 'package:my_webpage/postingpage.dart';
-import 'package:my_webpage/postpage.dart';
 import 'package:my_webpage/sidebar.dart';
 
 import 'homepage.dart';
@@ -20,15 +19,15 @@ class CustomRouter {
         builder: (context, state) => const MainLayout(child: HomePage()),
       ),
       GoRoute(
-        path: '/post',
-        builder: (context, state) => const MainLayout(child: PostPage()),
-      ),
-      GoRoute(
         path: '/postingPage',
         builder: (context, state) => const PostingPage(),
       ),
       GoRoute(
         path: '/login',
+        builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: '/ej23it289htaw4h',
         builder: (context, state) => const LoginPage(),
       ),
     ],

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
 import 'idpwcontroller.dart';
 
 class LoginPage extends StatefulWidget {
@@ -24,14 +23,7 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.all(8.0),
               child: SizedBox(
                 width: 500,
-                child: idPwController.buildForm(context),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SizedBox(
-                width: 500,
-                child: idPwController.buildForm(context),
+                child: idPwController.buildForm(context), // buildForm 한 번만 사용
               ),
             ),
             Center(
@@ -45,11 +37,12 @@ class _LoginPageState extends State<LoginPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: ElevatedButton(
-                        onPressed: () {
-                          context.go('/');
-                        },
-                        child: Text('GO HOME')),
-                  )
+                      onPressed: () {
+                        context.go('/');
+                      },
+                      child: Text('GO HOME'),
+                    ),
+                  ),
                 ],
               ),
             )

@@ -43,7 +43,7 @@ class Sidebar extends ConsumerWidget {
                   style: const TextStyle(color: Colors.white),
                 ),
                 onTap: () {
-                  context.go('/post');
+                  context.go('/post$index');
                 },
               );
             },

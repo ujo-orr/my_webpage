@@ -41,7 +41,7 @@ class IdPwController {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        hintText: 'How did you get in here...?',
+        hintText: 'I want to do better..',
       ),
       maxLength: 20,
       validator: (value) {
@@ -64,10 +64,10 @@ class IdPwController {
             UserCredential userCredential = await FirebaseAuth.instance
                 .signInWithEmailAndPassword(
                     email: idController.text, password: pwController.text);
-            print('login complete');
+            print('login complete $userCredential');
             // 로그인 성공 후 로직
             WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-              context.go('/');
+              context.go('/postingPage');
             });
           } on FirebaseAuthException catch (e) {
             if (e.code == 'user-not-found') {

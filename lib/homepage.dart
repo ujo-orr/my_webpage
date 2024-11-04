@@ -13,6 +13,17 @@ class HomePage extends ConsumerStatefulWidget {
   HomePageState createState() => HomePageState();
 }
 
+class RefreshNotifier extends StateNotifier<bool> {
+  RefreshNotifier() : super(false);
+
+  void refresh() {
+    state = !state;
+  }
+}
+
+final reFreshNotifier =
+    StateNotifierProvider<RefreshNotifier, bool>((ref) => RefreshNotifier());
+
 class HomePageState extends ConsumerState<HomePage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
@@ -28,15 +39,28 @@ class HomePageState extends ConsumerState<HomePage>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
-    )..repeat(reverse: true); // 반복 애니메이션
+    );
 
     _animation = Tween<double>(begin: 0.5, end: 1.0).animate(_controller);
+
+    // mounted 확인 후 repeat 실행
+    if (mounted) {
+      _controller.repeat(reverse: true); // 반복 애니메이션
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose(); // 컨트롤러를 정리하여 메모리 누수 방지
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final blogPostsAsync = ref.watch(blogPostsProvider);
 
+    // 별 위치 초기화
     if (starPositions.isEmpty) {
       for (int i = 0; i < 400; i++) {
         double x = Random().nextDouble() * size.width;
@@ -49,7 +73,8 @@ class HomePageState extends ConsumerState<HomePage>
       appBar: AppBar(
         title: TextButton(
           onPressed: () {
-            context.go('/');
+            // 새로고침
+            ref.read(reFreshNotifier.notifier).refresh();
           },
           child: Text(
             '삼 매 경',
@@ -83,43 +108,46 @@ class HomePageState extends ConsumerState<HomePage>
               );
             },
           ),
-          // 블로그 게시물 그리드 레이아웃
-          StreamBuilder<List<String>>(
-            stream: Stream.value(ref.watch(blogPostsProvider)), // Stream 변환
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Center(child: CircularProgressIndicator());
-              }
-              final posts = snapshot.data!;
+          blogPostsAsync.when(
+            data: (posts) {
               return GridView.builder(
                 padding: const EdgeInsets.all(16.0),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4, // 가로에 두 개씩 배치
+                  crossAxisCount: 2, // 가로에 두 개씩 배치
                   mainAxisSpacing: 25, // 수직 간격
                   crossAxisSpacing: 25, // 수평 간격
                   childAspectRatio: 6 / 2, // 300x200 비율
                 ),
                 itemCount: posts.length,
                 itemBuilder: (context, index) {
-                  return Container(
-                    width: 300,
-                    height: 200,
-                    color: Colors.blueAccent.withOpacity(0.2 * (index % 5 + 1)),
-                    child: Center(
-                      child: Text(
-                        posts[index],
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                  return GestureDetector(
+                    onTap: () {
+                      // 개별적인 클릭 반응
+                      context.go('/post$index');
+                    },
+                    child: Container(
+                      width: 300,
+                      height: 200,
+                      color:
+                          Colors.blueAccent.withOpacity(0.2 * (index % 5 + 1)),
+                      child: Center(
+                        child: Text(
+                          posts[index],
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
                       ),
                     ),
                   );
                 },
               );
             },
+            loading: () => Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(child: Text('Error: $error')),
           ),
         ],
       ),
