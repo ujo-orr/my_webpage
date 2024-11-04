@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:my_webpage/adminpage.dart';
 import 'package:my_webpage/data/firebase_options.dart';
 import 'package:my_webpage/loginpage/loginpage.dart';
 import 'package:my_webpage/postingpage.dart';
@@ -28,7 +29,7 @@ class CustomRouter {
       ),
       GoRoute(
         path: '/ej23it289htaw4h',
-        builder: (context, state) => const LoginPage(),
+        builder: (context, state) => const AdminPage(),
       ),
     ],
   );

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:go_router/go_router.dart';
+import 'package:my_webpage/adminpage.dart';
+import 'package:my_webpage/data/postdata.dart';
 
 class PostingPage extends ConsumerStatefulWidget {
   const PostingPage({super.key});
@@ -14,6 +17,7 @@ class _PostingPageState extends ConsumerState<PostingPage> {
   // Quill 컨트롤러 및 FocusNode
   final quill.QuillController _controller = quill.QuillController.basic();
   final titleController = TextEditingController();
+  final BlogService blogService = BlogService();
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +91,7 @@ class _PostingPageState extends ConsumerState<PostingPage> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('포스트가 업로드되었습니다!')),
                         );
+                        context.go('/');
                       },
                     );
                   } else {

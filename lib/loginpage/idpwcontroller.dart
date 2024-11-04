@@ -67,7 +67,7 @@ class IdPwController {
             print('login complete $userCredential');
             // 로그인 성공 후 로직
             WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-              context.go('/postingPage');
+              context.go('/ej23it289htaw4h');
             });
           } on FirebaseAuthException catch (e) {
             if (e.code == 'user-not-found') {
