@@ -2,13 +2,15 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // firebase Database에서 Future로 받을 예정
-final blogPostsProvider = StreamProvider<List<String>>((ref) async* {
+final blogPostsProvider = FutureProvider<List<DocumentSnapshot>>((ref) async {
   final querySnapshot =
       await FirebaseFirestore.instance.collection('posts').get();
-  yield querySnapshot.docs.map((doc) => doc['title'] as String).toList();
+  return querySnapshot.docs; // 각 문서의 DocumentSnapshot 리스트를 반환
 });
 
 final sideBarProvider = Provider<List<String>>((ref) {
@@ -21,20 +23,39 @@ final sideBarProvider = Provider<List<String>>((ref) {
 });
 
 class BlogService {
-  final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  // 이미지와 동영상을 Firebase Storage에 업로드하고 URL을 Firestore에 저장하는 함수
+  // 포스트 ID로 특정 포스트를 불러오는 함수
+  Future<Map<String, dynamic>?> getPostById(String postId) async {
+    try {
+      final doc = await _firestore.collection('posts').doc(postId).get();
+      if (doc.exists) {
+        return doc.data(); // 포스트 데이터를 반환
+      } else {
+        print('해당 포스트가 존재하지 않습니다.');
+        return null;
+      }
+    } catch (e) {
+      print('포스트 불러오기 실패: $e');
+      return null;
+    }
+  }
+
   Future<void> uploadPost({
     required String title,
     required String category,
-    required String text,
-    required File? imageFile,
-    required File? videoFile,
+    required quill.QuillController quillController,
+    required quillContent,
+    File? imageFile,
+    File? videoFile,
   }) async {
     try {
-      // 업로드할 때 타임스탬프 생성
       final timestamp = Timestamp.now();
+
+      // Quill 에디터 내용 가져오기
+      final content = quillController.document.toPlainText();
+      final contentJson = quillController.document.toDelta().toJson();
 
       // 이미지 업로드 후 URL 가져오기
       String? imageUrl;
@@ -52,11 +73,12 @@ class BlogService {
         videoUrl = await videoRef.getDownloadURL();
       }
 
-      // Firestore에 데이터 저장 (title을 문서 ID로 사용)
-      await _fireStore.collection('posts').doc(title).set({
+      // Firestore에 데이터 저장
+      await _firestore.collection('posts').doc(title).set({
         'title': title,
         'category': category,
-        'text': text,
+        'text': content,
+        'content': contentJson, // JSON 형태로 저장된 포맷 정보 포함
         'created_at': timestamp,
         'updated_at': timestamp,
         'image_url': imageUrl,

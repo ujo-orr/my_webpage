@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:go_router/go_router.dart';
-import 'package:my_webpage/adminpage.dart';
-import 'package:my_webpage/data/postdata.dart';
+import 'dart:io';
+
+import 'data/postdata.dart';
 
 class PostingPage extends ConsumerStatefulWidget {
   const PostingPage({super.key});
@@ -14,24 +14,27 @@ class PostingPage extends ConsumerStatefulWidget {
 }
 
 class _PostingPageState extends ConsumerState<PostingPage> {
-  // Quill 컨트롤러 및 FocusNode
   final quill.QuillController _controller = quill.QuillController.basic();
   final titleController = TextEditingController();
-  final BlogService blogService = BlogService();
+  final categoryController = TextEditingController();
+  final BlogService _blogService = BlogService();
+
+  File? imageFile; // 이미지 파일
+  File? videoFile; // 동영상 파일
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('POSTING PAGE')),
-      body: Center(
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: SizedBox(
-                  width: 600, // 원하는 크기 설정
+                  width: 600,
                   child: TextField(
                     controller: titleController,
                     decoration: InputDecoration(
@@ -41,8 +44,19 @@ class _PostingPageState extends ConsumerState<PostingPage> {
                   ),
                 ),
               ),
-              SizedBox(height: 10),
-              // Quill Toolbar (리치 텍스트 포맷 버튼)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SizedBox(
+                  width: 600,
+                  child: TextField(
+                    controller: categoryController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Category',
+                    ),
+                  ),
+                ),
+              ),
               Wrap(
                 alignment: WrapAlignment.center,
                 children: [
@@ -50,55 +64,49 @@ class _PostingPageState extends ConsumerState<PostingPage> {
                   IconButton(onPressed: () {}, icon: Icon(Icons.file_open)),
                 ],
               ),
-
-              SizedBox(height: 10),
-              // Quill 에디터 (리치 텍스트 입력 필드)
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Container(
-                  width: 600, // 원하는 크기 설정
+                  width: 600,
                   height: 600,
                   decoration:
                       BoxDecoration(border: Border.all(color: Colors.white)),
                   child: quill.QuillEditor(
-                    configurations: quill.QuillEditorConfigurations(),
                     controller: _controller,
                     scrollController: ScrollController(),
+                    configurations: quill.QuillEditorConfigurations(),
                     focusNode: FocusNode(),
                   ),
                 ),
               ),
-              SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
                   final title = titleController.text;
-                  final content =
-                      _controller.document.toPlainText(); // Quill 문서의 텍스트 가져오기
+                  final category = categoryController.text;
                   final contentJson = _controller.document.toDelta().toJson();
 
-                  if (title.isNotEmpty && content.isNotEmpty) {
-                    await FirebaseFirestore.instance
-                        .collection('posts')
-                        .doc(title)
-                        .set({
-                      'title': title,
-                      'text': content,
-                      'content': contentJson,
-                      'created_at': Timestamp.now(),
-                    });
+                  if (title.isNotEmpty && category.isNotEmpty) {
+                    await _blogService.uploadPost(
+                      title: title,
+                      category: category,
+                      quillController: _controller,
+                      quillContent: contentJson,
+                      imageFile: imageFile, // 선택한 이미지 파일
+                      videoFile: videoFile, // 선택한 동영상 파일
+                    );
                     WidgetsBinding.instance.addPostFrameCallback(
                       (timeStamp) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('포스트가 업로드되었습니다!')),
                         );
-                        context.go('/');
+                        context.go('/'); // 업로드 후 홈으로 이동
                       },
                     );
                   } else {
                     WidgetsBinding.instance.addPostFrameCallback(
                       (timeStamp) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('제목과 내용을 모두 입력해주세요.')),
+                          SnackBar(content: Text('제목과 카테고리를 모두 입력해주세요.')),
                         );
                       },
                     );

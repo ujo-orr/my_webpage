@@ -6,6 +6,7 @@ import 'package:my_webpage/adminpage.dart';
 import 'package:my_webpage/data/firebase_options.dart';
 import 'package:my_webpage/loginpage/loginpage.dart';
 import 'package:my_webpage/postingpage.dart';
+import 'package:my_webpage/postviewpage.dart';
 import 'package:my_webpage/sidebar.dart';
 
 import 'homepage.dart';
@@ -31,6 +32,13 @@ class CustomRouter {
         path: '/ej23it289htaw4h',
         builder: (context, state) => const AdminPage(),
       ),
+      GoRoute(
+        path: '/post/:postId',
+        builder: (context, state) {
+          final postId = state.pathParameters['postId']!;
+          return PostViewPage(postId: postId);
+        },
+      )
     ],
   );
 }

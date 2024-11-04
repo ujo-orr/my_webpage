@@ -120,19 +120,22 @@ class HomePageState extends ConsumerState<HomePage>
                 ),
                 itemCount: posts.length,
                 itemBuilder: (context, index) {
+                  final postId = posts[index].id; // Firestore 문서 ID
                   return GestureDetector(
                     onTap: () {
                       // 개별적인 클릭 반응
-                      context.go('/post$index');
+                      context.go('/post/$postId');
                     },
                     child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.white),
+                        color: Colors.grey.withOpacity(0.2 * (index % 5 + 1)),
+                      ),
                       width: 300,
                       height: 200,
-                      color:
-                          Colors.blueAccent.withOpacity(0.2 * (index % 5 + 1)),
                       child: Center(
                         child: Text(
-                          posts[index],
+                          posts[index].id,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
