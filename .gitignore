@@ -14,6 +14,7 @@ android/app/google-services.json
 android/app/build.gradle
 ios/Runner/GoogleService-Info.plist
 macos/Runner/GoogleService-Info.plist
+pubspec.lock
 
 # IntelliJ related
 *.iml

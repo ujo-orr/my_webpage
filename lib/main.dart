@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/translations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_webpage/adminpage.dart';
@@ -8,6 +9,7 @@ import 'package:my_webpage/loginpage/loginpage.dart';
 import 'package:my_webpage/postingpage.dart';
 import 'package:my_webpage/postviewpage.dart';
 import 'package:my_webpage/sidebar.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'homepage.dart';
 
@@ -63,6 +65,14 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Onglyp_harunanum',
         brightness: Brightness.dark,
       ),
+      localizationsDelegates: [
+        ...GlobalMaterialLocalizations.delegates,
+        FlutterQuillLocalizations.delegate, // 추가된 delegate
+      ],
+      supportedLocales: [
+        Locale('en', 'US'),
+        Locale('ko', 'KR'),
+      ],
     );
   }
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import 'package:go_router/go_router.dart';
 
 import 'data/postdata.dart';
@@ -14,7 +15,11 @@ class PostViewPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final blogService = BlogService();
-    final quillController = quill.QuillController.basic();
+    final quillController = QuillController(
+        document: Document(),
+        selection: TextSelection.collapsed(offset: 0),
+        readOnly: true,
+        keepStyleOnNewLine: true);
 
     return Scaffold(
       appBar: AppBar(
@@ -37,7 +42,7 @@ class PostViewPage extends ConsumerWidget {
             final post = snapshot.data!;
             final contentJson = post['content'] as List;
             quillController.document =
-                quill.Document.fromDelta(Delta.fromJson(contentJson));
+                Document.fromDelta(Delta.fromJson(contentJson));
 
             return Padding(
               padding: const EdgeInsets.all(16.0),
@@ -63,10 +68,26 @@ class PostViewPage extends ConsumerWidget {
                   ),
                   SizedBox(height: 20),
                   Expanded(
-                    child: quill.QuillEditor(
+                    child: QuillEditor(
                       controller: quillController,
                       scrollController: ScrollController(),
-                      configurations: quill.QuillEditorConfigurations(),
+                      configurations: QuillEditorConfigurations(
+                        readOnlyMouseCursor: SystemMouseCursors.basic,
+                        sharedConfigurations: QuillSharedConfigurations(
+                          extraConfigurations: {
+                            QuillSharedExtensionsConfigurations.key:
+                                QuillSharedExtensionsConfigurations()
+                          },
+                        ),
+                        checkBoxReadOnly: true,
+                        embedBuilders: FlutterQuillEmbeds.editorWebBuilders(
+                            imageEmbedConfigurations:
+                                QuillEditorImageEmbedConfigurations(
+                              onImageClicked: (imageSource) => '',
+                            ),
+                            videoEmbedConfigurations:
+                                QuillEditorWebVideoEmbedConfigurations()),
+                      ),
                       focusNode: FocusNode(),
                     ),
                   ),

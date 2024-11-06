@@ -1,12 +1,14 @@
-import 'dart:io';
+import 'dart:async';
+import 'dart:typed_data';
+
+import 'package:universal_html/html.dart' as html;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// firebase Database에서 Future로 받을 예정
+// firebase Database에서 Future로 받기
 final blogPostsProvider = FutureProvider<List<DocumentSnapshot>>((ref) async {
   final querySnapshot =
       await FirebaseFirestore.instance.collection('posts').get();
@@ -23,15 +25,14 @@ final sideBarProvider = Provider<List<String>>((ref) {
 });
 
 class BlogService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  // 포스트 ID로 특정 포스트를 불러오는 함수
   Future<Map<String, dynamic>?> getPostById(String postId) async {
     try {
-      final doc = await _firestore.collection('posts').doc(postId).get();
+      final doc = await _fireStore.collection('posts').doc(postId).get();
       if (doc.exists) {
-        return doc.data(); // 포스트 데이터를 반환
+        return doc.data(); // 문서 데이터를 반환
       } else {
         print('해당 포스트가 존재하지 않습니다.');
         return null;
@@ -42,52 +43,72 @@ class BlogService {
     }
   }
 
+  Future<String?> uploadImageToStorage({
+    required Uint8List imageData,
+    required String fileName,
+  }) async {
+    try {
+      final ref = _storage.ref().child('posts/$fileName');
+      await ref.putData(imageData);
+      return await ref.getDownloadURL();
+    } catch (e) {
+      print("Image upload error: $e");
+      return null;
+    }
+  }
+
+  Future<String?> uploadVideoToStorage({
+    required Uint8List videoData,
+    required String fileName,
+  }) async {
+    try {
+      final ref = _storage.ref().child('posts/$fileName');
+      await ref.putData(videoData);
+      return await ref.getDownloadURL();
+    } catch (e) {
+      print("Video upload error: $e");
+      return null;
+    }
+  }
+
   Future<void> uploadPost({
     required String title,
     required String category,
-    required quill.QuillController quillController,
-    required quillContent,
-    File? imageFile,
-    File? videoFile,
+    required List quillContent,
+    String? imageUrl,
+    String? videoUrl,
   }) async {
-    try {
-      final timestamp = Timestamp.now();
+    final timestamp = DateTime.now();
 
-      // Quill 에디터 내용 가져오기
-      final content = quillController.document.toPlainText();
-      final contentJson = quillController.document.toDelta().toJson();
+    await _fireStore.collection('posts').doc(title).set({
+      'title': title,
+      'category': category,
+      'content': quillContent,
+      'created_at': timestamp,
+      'image_url': imageUrl,
+      'video_url': videoUrl,
+    });
+  }
 
-      // 이미지 업로드 후 URL 가져오기
-      String? imageUrl;
-      if (imageFile != null) {
-        final imageRef = _storage.ref().child('posts/$title-image.jpg');
-        await imageRef.putFile(imageFile);
-        imageUrl = await imageRef.getDownloadURL();
+  // 파일을 선택하고 Uint8List로 읽어오는 메서드
+  Future<Uint8List?> pickFile(String fileType) async {
+    final completer = Completer<Uint8List?>();
+    final input = html.FileUploadInputElement()..accept = fileType;
+    input.click();
+
+    input.onChange.listen((event) async {
+      final files = input.files;
+      if (files?.isEmpty ?? true) {
+        completer.complete(null);
+        return;
       }
-
-      // 동영상 업로드 후 URL 가져오기
-      String? videoUrl;
-      if (videoFile != null) {
-        final videoRef = _storage.ref().child('posts/$title-video.mp4');
-        await videoRef.putFile(videoFile);
-        videoUrl = await videoRef.getDownloadURL();
-      }
-
-      // Firestore에 데이터 저장
-      await _firestore.collection('posts').doc(title).set({
-        'title': title,
-        'category': category,
-        'text': content,
-        'content': contentJson, // JSON 형태로 저장된 포맷 정보 포함
-        'created_at': timestamp,
-        'updated_at': timestamp,
-        'image_url': imageUrl,
-        'video_url': videoUrl,
+      final reader = html.FileReader();
+      reader.readAsArrayBuffer(files!.first);
+      reader.onLoadEnd.listen((event) {
+        completer.complete(reader.result as Uint8List);
       });
+    });
 
-      print("포스트가 성공적으로 업로드되었습니다!");
-    } catch (e) {
-      print("포스트 업로드 중 오류 발생: $e");
-    }
+    return completer.future;
   }
 }

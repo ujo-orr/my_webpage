@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -59,7 +60,13 @@ class Sidebar extends ConsumerWidget {
             ),
           ),
           onTap: () {
-            context.go('/login');
+            final user = FirebaseAuth.instance.currentUser;
+
+            if (user != null) {
+              context.go('/ej23it289htaw4h');
+            } else {
+              context.go('/login');
+            }
           },
         ),
       ],
