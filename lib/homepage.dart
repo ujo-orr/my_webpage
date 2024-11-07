@@ -84,15 +84,6 @@ class HomePageState extends ConsumerState<HomePage>
             ),
           ),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: IconButton(
-              onPressed: () {},
-              icon: Icon(Icons.search_rounded),
-            ),
-          ),
-        ],
       ),
       body: Stack(
         children: [

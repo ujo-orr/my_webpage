@@ -13,15 +13,6 @@ final blogPostsProvider = FutureProvider<List<DocumentSnapshot>>((ref) async {
   return querySnapshot.docs; // 각 문서의 DocumentSnapshot 리스트를 반환
 });
 
-final sideBarProvider = Provider<List<String>>((ref) {
-  return [
-    'My name',
-    'School',
-    'age',
-    'hobby',
-  ];
-});
-
 class BlogService {
   final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
@@ -56,13 +47,11 @@ class BlogService {
     required String title,
     required String category,
     required String quillContentHtml,
-    String? base64Image,
   }) async {
     await _fireStore.collection('posts').doc(title).set({
       'title': title,
       'category': category,
       'content_html': quillContentHtml,
-      'image_data': base64Image,
       'created_at': DateTime.now(),
     });
   }

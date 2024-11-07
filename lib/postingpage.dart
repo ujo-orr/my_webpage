@@ -66,22 +66,10 @@ class _PostingPageState extends ConsumerState<PostingPage> {
         return;
       }
 
-      // 이미지 선택 및 인코딩
-      final picker = ImagePicker();
-      final XFile? pickedFile =
-          await picker.pickImage(source: ImageSource.gallery);
-
-      String? base64Image;
-      if (pickedFile != null) {
-        final Uint8List imageData = await pickedFile.readAsBytes();
-        base64Image = base64Encode(imageData);
-      }
-
       await _blogService.uploadPost(
         title: title,
         category: category,
         quillContentHtml: contentHtml,
-        base64Image: base64Image, // 인코딩된 이미지가 있으면 전달
       );
 
       if (mounted) {
@@ -102,7 +90,14 @@ class _PostingPageState extends ConsumerState<PostingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('POSTING PAGE')),
+      appBar: AppBar(
+        title: Text('POSTING PAGE'),
+        leading: IconButton(
+            onPressed: () {
+              context.go('/');
+            },
+            icon: Icon(Icons.home)),
+      ),
       body: SingleChildScrollView(
         child: Center(
           child: Column(

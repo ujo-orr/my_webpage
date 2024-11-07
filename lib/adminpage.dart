@@ -9,6 +9,11 @@ class AdminPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('ADMIN PAGE'),
+        leading: IconButton(
+            onPressed: () {
+              context.go('/');
+            },
+            icon: Icon(Icons.home)),
       ),
       body: Center(
         child: Column(
@@ -21,11 +26,7 @@ class AdminPage extends StatelessWidget {
                 },
                 child: Text('Post Write')),
             SizedBox(height: 10),
-            ElevatedButton(
-                onPressed: () {
-                  // modifying logic
-                },
-                child: Text('Pst Modify')),
+            ElevatedButton(onPressed: () {}, child: Text('Pst Modify')),
           ],
         ),
       ),

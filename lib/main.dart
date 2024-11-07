@@ -8,8 +8,9 @@ import 'package:my_webpage/data/firebase_options.dart';
 import 'package:my_webpage/loginpage/loginpage.dart';
 import 'package:my_webpage/postingpage.dart';
 import 'package:my_webpage/postviewpage.dart';
-import 'package:my_webpage/sidebar.dart';
+import 'package:my_webpage/sidebar/sidebar.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:my_webpage/sidebar/sidebarpage.dart';
 
 import 'homepage.dart';
 
@@ -40,7 +41,14 @@ class CustomRouter {
           final postId = state.pathParameters['postId']!;
           return PostViewPage(postId: postId);
         },
-      )
+      ),
+      GoRoute(
+        path: '/detail/:detailKey',
+        builder: (context, state) {
+          final detailKey = state.pathParameters['detailKey']!;
+          return SidebarPage(detailKey: detailKey);
+        },
+      ),
     ],
   );
 }

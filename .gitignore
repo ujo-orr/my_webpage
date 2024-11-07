@@ -15,6 +15,7 @@ android/app/build.gradle
 ios/Runner/GoogleService-Info.plist
 macos/Runner/GoogleService-Info.plist
 pubspec.lock
+firebase.json
 
 # IntelliJ related
 *.iml

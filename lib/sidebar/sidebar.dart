@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:my_webpage/data/postdata.dart';
+import 'sidebardata.dart';
 
 class Sidebar extends ConsumerWidget {
   const Sidebar({super.key});
@@ -44,7 +44,8 @@ class Sidebar extends ConsumerWidget {
                   style: const TextStyle(color: Colors.white),
                 ),
                 onTap: () {
-                  context.go('/post$index');
+                  // 항목을 선택할 때 해당 이름을 URL 매개변수로 전달
+                  context.go('/detail/${posts[index]}');
                 },
               );
             },
