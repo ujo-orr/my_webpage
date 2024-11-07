@@ -1,13 +1,13 @@
+import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:go_router/go_router.dart';
+import 'package:vsc_quill_delta_to_html/vsc_quill_delta_to_html.dart';
 import 'data/postdata.dart';
 
 class PostingPage extends ConsumerStatefulWidget {
@@ -18,71 +18,91 @@ class PostingPage extends ConsumerStatefulWidget {
 }
 
 class _PostingPageState extends ConsumerState<PostingPage> {
-  final QuillController _controller = QuillController(
-    document: Document(),
-    selection: TextSelection.collapsed(offset: 0),
-  );
+  final QuillController _controller = QuillController.basic();
   final titleController = TextEditingController();
   final categoryController = TextEditingController();
   final BlogService _blogService = BlogService();
 
-  String? imageUrl;
-  String? videoUrl;
+  Future<void> pickImage() async {
+    try {
+      final picker = ImagePicker();
+      final XFile? pickedFile =
+          await picker.pickImage(source: ImageSource.gallery);
 
-  // Firebase Storage에 업로드된 이미지 URL을 가져와 QuillEditor에 추가
-  Future<void> pickAndUploadImage() async {
-    final picker = ImagePicker();
-    final XFile? pickedFile =
-        await picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        final Uint8List imageData = await pickedFile.readAsBytes();
+        final String base64Image = base64Encode(imageData);
 
-    if (pickedFile != null) {
-      final Uint8List imageData = await pickedFile.readAsBytes();
-
-      // Firebase Storage에 이미지 업로드 후 URL 받기
-      final uploadedImageUrl = await _blogService.uploadImageToStorage(
-        imageData: imageData,
-        fileName: pickedFile.name,
-      );
-
-      if (uploadedImageUrl != null) {
-        // QuillEditor에 Firebase Storage의 이미지 URL 추가
+        final imageUrl = 'data:image/png;base64,$base64Image';
         final index = _controller.selection.baseOffset;
-        _controller.document.insert(index, BlockEmbed.image(uploadedImageUrl));
+        _controller.document.insert(index, BlockEmbed.image(imageUrl));
         _controller.updateSelection(
           TextSelection.collapsed(offset: index + 1),
           ChangeSource.local,
         );
       }
+    } catch (e) {
+      throw Exception('pickImage error : $e');
     }
   }
 
-  Future<dynamic> pickAndUploadVideo() async {
-    final picker = ImagePicker();
-    final XFile? pickedFile =
-        await picker.pickVideo(source: ImageSource.gallery);
+  Future<void> uploadPosts() async {
+    try {
+      final String title = titleController.text;
+      final String category = categoryController.text;
 
-    if (pickedFile != null) {
-      final Uint8List videoData = await pickedFile.readAsBytes();
+      // Delta 객체를 HTML 형식으로 변환
+      final List<Map<String, dynamic>> contentDelta =
+          _controller.document.toDelta().toJson();
+      final converter = QuillDeltaToHtmlConverter(contentDelta);
+      final contentHtml = converter.convert();
 
-      // Firebase Storage에 비디오 업로드 후 URL 받기
-      videoUrl = await _blogService.uploadVideoToStorage(
-        videoData: videoData,
-        fileName: pickedFile.name,
+      if (title.isEmpty || category.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('제목과 카테고리를 모두 입력해주세요.')),
+          );
+        }
+        return;
+      }
+
+      // 이미지 선택 및 인코딩
+      final picker = ImagePicker();
+      final XFile? pickedFile =
+          await picker.pickImage(source: ImageSource.gallery);
+
+      String? base64Image;
+      if (pickedFile != null) {
+        final Uint8List imageData = await pickedFile.readAsBytes();
+        base64Image = base64Encode(imageData);
+      }
+
+      await _blogService.uploadPost(
+        title: title,
+        category: category,
+        quillContentHtml: contentHtml,
+        base64Image: base64Image, // 인코딩된 이미지가 있으면 전달
       );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('포스트가 업로드되었습니다!')),
+        );
+        context.go('/');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('업로드 중 오류가 발생했습니다. 다시 시도해주세요.')),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('POSTING PAGE'),
-        leading: IconButton(
-            onPressed: () {
-              context.go('/');
-            },
-            icon: Icon(Icons.home)),
-      ),
+      appBar: AppBar(title: Text('POSTING PAGE')),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
@@ -117,20 +137,16 @@ class _PostingPageState extends ConsumerState<PostingPage> {
               Wrap(
                 alignment: WrapAlignment.center,
                 children: [
-                  QuillSimpleToolbar(
+                  QuillToolbar.simple(
                     controller: _controller,
                     configurations: QuillSimpleToolbarConfigurations(
-                      showAlignmentButtons: true,
-                    ),
+                        toolbarIconAlignment: WrapAlignment.center,
+                        showAlignmentButtons: true),
                   ),
-                  QuillToolbarImageButton(
-                    controller: _controller,
-                    options: QuillToolbarImageButtonOptions(),
+                  IconButton(
+                    icon: Icon(Icons.image),
+                    onPressed: pickImage,
                   ),
-                  QuillToolbarVideoButton(
-                    controller: _controller,
-                    options: QuillToolbarVideoButtonOptions(),
-                  )
                 ],
               ),
               Padding(
@@ -144,38 +160,14 @@ class _PostingPageState extends ConsumerState<PostingPage> {
                     controller: _controller,
                     scrollController: ScrollController(),
                     configurations: QuillEditorConfigurations(
-                        embedBuilders:
-                            FlutterQuillEmbeds.defaultEditorBuilders()),
+                      embedBuilders: FlutterQuillEmbeds.defaultEditorBuilders(),
+                    ),
                     focusNode: FocusNode(),
                   ),
                 ),
               ),
               ElevatedButton(
-                onPressed: () async {
-                  final title = titleController.text;
-                  final category = categoryController.text;
-                  final contentJson = _controller.document.toDelta().toJson();
-
-                  if (title.isNotEmpty && category.isNotEmpty) {
-                    await _blogService.uploadPost(
-                      title: title,
-                      category: category,
-                      quillContent: contentJson,
-                    );
-                    WidgetsBinding.instance.addPostFrameCallback(
-                      (timeStamp) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('포스트가 업로드되었습니다!')),
-                        );
-                        context.go('/'); // 업로드 후 홈으로 이동
-                      },
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('제목과 카테고리를 모두 입력해주세요.')),
-                    );
-                  }
-                },
+                onPressed: uploadPosts,
                 child: Text('UPLOAD'),
               ),
             ],

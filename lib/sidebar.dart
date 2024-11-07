@@ -50,25 +50,17 @@ class Sidebar extends ConsumerWidget {
             },
           ),
         ),
-        GestureDetector(
-          child: Opacity(
-            opacity: 0.0,
-            child: Container(
-              height: 50,
-              width: 50,
-              color: Colors.black,
-            ),
-          ),
-          onTap: () {
-            final user = FirebaseAuth.instance.currentUser;
+        IconButton(
+            onPressed: () {
+              final user = FirebaseAuth.instance.currentUser;
 
-            if (user != null) {
-              context.go('/ej23it289htaw4h');
-            } else {
-              context.go('/login');
-            }
-          },
-        ),
+              if (user != null) {
+                context.go('/ej23it289htaw4h');
+              } else {
+                context.go('/login');
+              }
+            },
+            icon: Icon(Icons.key)),
       ],
     );
   }

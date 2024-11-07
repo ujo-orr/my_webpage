@@ -46,7 +46,7 @@ class IdPwController {
       maxLength: 20,
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'Empty';
+          return 'Empty.';
         }
         if (!RegExp(r'^[a-zA-Z0-9!@+]+$').hasMatch(value)) {
           return 'No.';
@@ -61,22 +61,35 @@ class IdPwController {
       onPressed: () async {
         if (formKey.currentState?.validate() ?? false) {
           try {
+            // ignore: unused_local_variable
             UserCredential userCredential = await FirebaseAuth.instance
                 .signInWithEmailAndPassword(
                     email: idController.text, password: pwController.text);
-            print('login complete $userCredential');
+
             // 로그인 성공 후 로직
             WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
               context.go('/ej23it289htaw4h');
             });
           } on FirebaseAuthException catch (e) {
-            if (e.code == 'user-not-found') {
-              WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+            String errorMessage;
+            if (e.code == 'invalid-email') {
+              errorMessage = '없는 아이디 입니다.';
+            } else if (e.code == 'invalid-password') {
+              errorMessage = '비밀번호가 틀렸습니다.';
+            } else if (e.code == 'invalid-credential') {
+              errorMessage = '잘못된 정보입니다.';
+            } else {
+              errorMessage = '${e.message}';
+            }
+
+            // 다이얼로그 표시
+            WidgetsBinding.instance.addPostFrameCallback(
+              (timeStamp) {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: Text('error'),
-                    content: Text('User not found'),
+                    title: Text('로그인 실패'),
+                    content: Text(errorMessage),
                     actions: [
                       TextButton(
                         onPressed: () {
@@ -87,30 +100,8 @@ class IdPwController {
                     ],
                   ),
                 );
-              });
-            } else if (e.code == 'wrong-password') {
-              WidgetsBinding.instance.addPostFrameCallback(
-                (timeStamp) {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text('password'),
-                      content: Text('password not'),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text('ok'),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              );
-            } else {
-              Exception('login Fail: ${e.message}');
-            }
+              },
+            );
           }
         }
       },
