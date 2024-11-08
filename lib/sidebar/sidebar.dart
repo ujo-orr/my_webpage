@@ -38,15 +38,20 @@ class Sidebar extends ConsumerWidget {
           child: ListView.builder(
             itemCount: posts.length,
             itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(
-                  posts[index],
-                  style: const TextStyle(color: Colors.white),
-                ),
-                onTap: () {
-                  // 항목을 선택할 때 해당 이름을 URL 매개변수로 전달
-                  context.go('/detail/${posts[index]}');
-                },
+              return Column(
+                children: [
+                  ListTile(
+                    title: Text(
+                      posts[index],
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    onTap: () {
+                      // 항목을 선택할 때 해당 이름을 URL 매개변수로 전달
+                      context.go('/detail/${posts[index]}');
+                    },
+                  ),
+                  Divider(color: Colors.white30),
+                ],
               );
             },
           ),
