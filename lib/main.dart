@@ -94,22 +94,32 @@ class MainLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Row(
-        children: [
-          Container(
-            width: 250,
-            decoration: BoxDecoration(
-              color: Colors.black,
-              image: DecorationImage(
-                image: AssetImage('assets/images/glitter.jpg'),
-                opacity: 0.5,
-                fit: BoxFit.cover,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // 화면 너비에 따라 사이드바의 비율을 조절
+          double sidebarWidth = constraints.maxWidth * 0.2; // 기본적으로 화면의 20%
+          if (constraints.maxWidth < 600) {
+            sidebarWidth = constraints.maxWidth * 0.3; // 작은 화면에서는 30%
+          }
+
+          return Row(
+            children: [
+              Container(
+                width: sidebarWidth,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  image: DecorationImage(
+                    image: AssetImage('assets/images/glitter.jpg'),
+                    opacity: 0.5,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: Sidebar(),
               ),
-            ),
-            child: Sidebar(),
-          ),
-          Expanded(child: child),
-        ],
+              Expanded(child: child),
+            ],
+          );
+        },
       ),
     );
   }
