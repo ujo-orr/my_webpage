@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:my_webpage/data/provider/sidebar_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'sidebardata.dart';
-
 class SidebarPage extends ConsumerWidget {
-  const SidebarPage({super.key, required this.detailKey});
   final String detailKey;
+
+  const SidebarPage({super.key, required this.detailKey});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sideBarDetails = ref.watch(sideBarDetailsProvider);
-    final detailValue = sideBarDetails[detailKey] ?? '정보가 없습니다';
+    final viewModel = ref.watch(sidebarDetailViewModelProvider);
+    final detailValue = viewModel.getSidebarDetail(detailKey);
 
     return Scaffold(
       appBar: AppBar(
@@ -21,20 +21,23 @@ class SidebarPage extends ConsumerWidget {
           onPressed: () {
             context.go('/');
           },
-          icon: Icon(Icons.home),
+          icon: const Icon(Icons.home),
         ),
       ),
       body: Center(
         child: GestureDetector(
           onTap: () async {
-            // detailValue가 링크일 경우 브라우저로 열기
             if (Uri.tryParse(detailValue)?.hasAbsolutePath == true) {
               final Uri url = Uri.parse(detailValue);
               if (await canLaunchUrl(url)) {
                 await launchUrl(url, mode: LaunchMode.externalApplication);
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('URL을 열 수 없습니다: $detailValue')),
+                WidgetsBinding.instance.addPostFrameCallback(
+                  (timeStamp) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('URL을 열 수 없습니다: $detailValue')),
+                    );
+                  },
                 );
               }
             }
@@ -45,7 +48,7 @@ class SidebarPage extends ConsumerWidget {
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Uri.tryParse(detailValue)?.hasAbsolutePath == true
-                  ? Colors.blue // 링크일 경우 파란색 텍스트
+                  ? Colors.blue
                   : Colors.white,
             ),
           ),
