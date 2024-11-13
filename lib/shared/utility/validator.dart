@@ -10,7 +10,7 @@ class Validators {
   static String? passwordValidator(String? value) {
     if (value == null || value.isEmpty) return 'Empty.';
     if (!RegExp(r'^[a-zA-Z0-9!@+]+$').hasMatch(value)) {
-      return 'Invalid characters used.';
+      return '유효한 비밀번호를 입력하세요.';
     }
     return null;
   }

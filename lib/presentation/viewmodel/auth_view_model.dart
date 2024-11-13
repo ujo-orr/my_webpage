@@ -12,7 +12,7 @@ class AuthViewModel extends StateNotifier<AsyncValue<UserCredential?>> {
   AuthViewModel(this.signInUseCase, this.idController, this.pwController)
       : super(const AsyncValue.data(null));
 
-  Future<void> signIn() async {
+  Future<bool> signIn() async {
     if (formKey.currentState?.validate() ?? false) {
       state = const AsyncValue.loading();
       try {
@@ -21,9 +21,19 @@ class AuthViewModel extends StateNotifier<AsyncValue<UserCredential?>> {
           pwController.text,
         );
         state = AsyncValue.data(userCredential);
-      } catch (e) {
-        state = AsyncValue.error(e, StackTrace.current);
+        return true;
+      } catch (e, stackTrace) {
+        state = AsyncValue.error(e, stackTrace);
+        return false;
       }
     }
+    return false;
+  }
+
+  @override
+  void dispose() {
+    idController.dispose();
+    pwController.dispose();
+    super.dispose();
   }
 }

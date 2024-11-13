@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_webpage/data/repository/sidebar_repository.dart';
 import 'package:my_webpage/domain/usecase/fetch_sidebar_detail_usecase.dart';
 import 'package:my_webpage/domain/usecase/fetch_sidebar_item_usecase.dart';
-import 'package:my_webpage/presentation/viewmodel/sidebar_detail_view_model.dart';
 import 'package:my_webpage/presentation/viewmodel/sidebar_view_model.dart';
 
 final sidebarRepositoryProvider = Provider((ref) => SidebarRepository(ref));

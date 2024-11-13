@@ -97,7 +97,7 @@ class PostingPage extends ConsumerWidget {
                         .read(postingViewModelProvider.notifier)
                         .uploadPost();
                     WidgetsBinding.instance.addPostFrameCallback(
-                      (timeStamp) {
+                      (_) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('포스트가 업로드되었습니다!')),
                         );
@@ -106,7 +106,7 @@ class PostingPage extends ConsumerWidget {
                     );
                   } catch (e) {
                     WidgetsBinding.instance.addPostFrameCallback(
-                      (timeStamp) {
+                      (_) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('업로드 실패: $e')),
                         );

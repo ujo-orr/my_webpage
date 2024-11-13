@@ -6,7 +6,7 @@ class SignInUseCase {
 
   SignInUseCase(this.authRepository);
 
-  Future<UserCredential> execute(String email, String password) {
+  Future<UserCredential?> execute(String email, String password) {
     return authRepository.signIn(email, password);
   }
 }

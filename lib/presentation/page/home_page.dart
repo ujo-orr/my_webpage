@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:my_webpage/data/provider/audio_provider.dart';
 import 'package:my_webpage/data/provider/post_provider.dart';
 import 'package:my_webpage/presentation/layout/nightanimation.dart';
 
@@ -10,6 +11,7 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final blogPostsAsync = ref.watch(homeViewModelProvider);
+    final isPlaying = ref.watch(soundViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -24,6 +26,17 @@ class HomePage extends ConsumerWidget {
             ),
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              ref.read(soundViewModelProvider.notifier).toggleSound();
+            },
+            icon: Icon(
+              isPlaying ? Icons.volume_up : Icons.volume_off,
+              color: isPlaying ? Colors.grey : Colors.amberAccent,
+            ),
+          ),
+        ],
       ),
       body: Stack(
         children: [

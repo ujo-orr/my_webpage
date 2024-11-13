@@ -33,7 +33,7 @@ class SidebarPage extends ConsumerWidget {
                 await launchUrl(url, mode: LaunchMode.externalApplication);
               } else {
                 WidgetsBinding.instance.addPostFrameCallback(
-                  (timeStamp) {
+                  (_) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('URL을 열 수 없습니다: $detailValue')),
                     );

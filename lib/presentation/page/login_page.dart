@@ -56,10 +56,10 @@ class LoginPage extends ConsumerWidget {
                     data: (user) {
                       return ElevatedButton(
                         onPressed: () async {
-                          await viewModelNotifier.signIn();
-                          if (user != null) {
+                          final isSignIn = await viewModelNotifier.signIn();
+                          if (isSignIn) {
                             WidgetsBinding.instance.addPostFrameCallback(
-                              (timeStamp) {
+                              (_) {
                                 context.go('/ej23it289htaw4h');
                               },
                             );
@@ -69,7 +69,31 @@ class LoginPage extends ConsumerWidget {
                       );
                     },
                     loading: () => const CircularProgressIndicator(),
-                    error: (error, stack) => Text('로그인 실패: $error'),
+                    error: (error, stackTrace) {
+                      WidgetsBinding.instance.addPostFrameCallback(
+                        (_) {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text('로그인 오류'),
+                              content: Text(error.toString()),
+                              actions: [
+                                TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
+                                    child: Text('확인'))
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                      return ElevatedButton(
+                        onPressed: () async {
+                          await viewModelNotifier.signIn();
+                        },
+                        child: Text('LOGIN'),
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(

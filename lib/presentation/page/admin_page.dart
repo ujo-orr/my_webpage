@@ -25,8 +25,6 @@ class AdminPage extends StatelessWidget {
                   context.go('/postingPage');
                 },
                 child: Text('Post Write')),
-            SizedBox(height: 10),
-            ElevatedButton(onPressed: () {}, child: Text('Post Modify')),
           ],
         ),
       ),
