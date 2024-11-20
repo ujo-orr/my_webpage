@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -25,6 +26,13 @@ class AdminPage extends StatelessWidget {
                   context.go('/postingPage');
                 },
                 child: Text('Post Write')),
+            SizedBox(height: 10),
+            ElevatedButton(
+                onPressed: () {
+                  FirebaseAuth.instance.signOut();
+                  context.go('/');
+                },
+                child: Text('logout')),
           ],
         ),
       ),
