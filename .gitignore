@@ -17,6 +17,8 @@ macos/Runner/GoogleService-Info.plist
 pubspec.lock
 firebase.json
 assets/
+.firebase
+.firebaserc
 
 # IntelliJ related
 *.iml

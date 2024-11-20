@@ -5,18 +5,26 @@ class SoundViewModel extends StateNotifier<bool> {
   final AudioElement _audioElement;
 
   SoundViewModel()
-      : _audioElement = AudioElement('assets/sound/night_ambience.mp3'),
+      : _audioElement = AudioElement('assets/assets/sound/night_ambience.mp3'),
         super(false) {
-    _audioElement.loop = true; // 반복 재생
+    _audioElement.loop = true;
+    _audioElement.preload = 'auto';
+    _audioElement.defaultMuted = true;
+    _audioElement.muted = true;
   }
 
-  void toggleSound() {
+  Future<void> toggleSound() async {
     if (state) {
       _audioElement.pause();
       state = false;
     } else {
-      _audioElement.play();
-      state = true;
+      try {
+        _audioElement.muted = false;
+        await _audioElement.play();
+        state = true;
+      } catch (e) {
+        throw Exception('audio error $e');
+      }
     }
   }
 
